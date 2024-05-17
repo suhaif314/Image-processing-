@@ -1,0 +1,9 @@
+def max(a,b) (a>b?a:b)
+int main()
+{int m,x=5,y=6;
+m=max(x+y,10);
+printf("%d",m);
+m=max(x,y)*100;
+printf("%d",m);
+return 0;
+}

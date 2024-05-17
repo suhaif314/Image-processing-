@@ -1,0 +1,50 @@
+import cv2
+import numpy as np
+from matplotlib import pyplot as plt
+
+# Load the input image
+input_image = cv2.imread('C:\\Users\\DELL\\Documents\\SEM 7\\EE604A(image Proccess)\\Assignment-2_newtestcases\\Assignment-2\\Q1\ground truth\\lava21.jpg')
+
+# Convert the input image to the HSV color space
+hsv_image = cv2.cvtColor(input_image, cv2.COLOR_BGR2HSV)
+print(hsv_image)
+# Define the lower and upper HSV range for lava color (you may need to adjust these values)
+lower_range = np.array([0, 125, 125])
+upper_range = np.array([255, 255, 255])
+
+# Create a mask to segment the lava based on color
+color_mask = cv2.inRange(hsv_image, lower_range, upper_range)
+
+# Convert the input image to grayscale for easier processing
+gray_image = cv2.cvtColor(input_image, cv2.COLOR_BGR2GRAY)
+
+# Apply thresholding to segment lava region
+ret, thresholded_image = cv2.threshold(gray_image, 70, 105, cv2.THRESH_BINARY)
+
+# Perform morphological operations to remove noise and fill gaps
+kernel = np.ones((5, 5), np.uint8)
+morphed_image = cv2.morphologyEx(thresholded_image, cv2.MORPH_CLOSE, kernel)
+
+# Combine the color-based mask and the morphology-based mask
+final_mask = cv2.bitwise_and(color_mask, morphed_image)
+
+# Find contours in the final mask
+contours, _ = cv2.findContours(final_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+# Create a mask image with white as the detected lava region
+lava_result = np.zeros_like(input_image)
+for contour in contours:
+    if cv2.contourArea(contour) > 1000:  # Adjust the area threshold as needed
+        cv2.drawContours(lava_result, [contour], -1, (255, 255, 255), thickness=cv2.FILLED)
+
+# print(lava_result.shape)
+# lava = [[] [] []]
+# lava[:,:,0]= lava_result 
+# lava[:,:,1]=lava_result 
+# lava[:,:,2]=lava_result 
+# Plot the resulting mask image
+# print(lava_result)
+plt.imshow(cv2.cvtColor(lava_result, cv2.COLOR_BGR2RGB))
+plt.title("Lava Mask")
+plt.axis('off')
+plt.show()
